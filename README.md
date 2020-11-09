@@ -4,7 +4,7 @@ It is integrated [Yolact](https://github.com/dbolya/yolact) with ROS
 
 [Yolact(You Only Look At CoefficienTs) with ROS and Webcam](https://www.youtube.com/watch?v=Qn949mpmndI&feature=youtu.be)
 
-# Requirement 
+# Requirement
 
 * ROS(Kinetic)
 * GPU supporting CUDA
@@ -17,13 +17,13 @@ It is integrated [Yolact](https://github.com/dbolya/yolact) with ROS
    ```Shell
    # Cython needs to be installed before pycocotools
    pip install cython
-   pip install opencv-python pillow pycocotools matplotlib 
-   
+   pip install opencv-python pillow pycocotools matplotlib
+
    conda install opencv
    pip install pyyaml
    pip install rospkg
 
-   
+
    ```
  - Clone this repository and enter it:
    ```Shell
@@ -40,7 +40,7 @@ It is integrated [Yolact](https://github.com/dbolya/yolact) with ROS
    ```
 
 
-# Weight 
+# Weight
 | Image Size | Backbone      | FPS  | mAP  | Weights                                                                                                              |  |
 |:----------:|:-------------:|:----:|:----:|----------------------------------------------------------------------------------------------------------------------|--------|
 | 550        | Resnet50-FPN  | 42.5 | 28.2 | [yolact_resnet50_54_800000.pth](https://drive.google.com/file/d/1yp7ZbbDwvMiFJEq4ptVKTYTI2VeRDXl0/view?usp=sharing)  | [Mirror](https://ucdavis365-my.sharepoint.com/:u:/g/personal/yongjaelee_ucdavis_edu/EUVpxoSXaqNIlssoLKOEoCcB1m0RpzGq_Khp5n1VX3zcUw) |
@@ -53,7 +53,7 @@ To evalute the model, put the corresponding weights file in the `./weights` dire
 
 In my workspace, After downloaded the [weight](https://drive.google.com/file/d/1yp7ZbbDwvMiFJEq4ptVKTYTI2VeRDXl0/view?usp=sharing), copy and paste to the _trained_model path_.
 
-Conda env: 
+Conda env:
 - torch11py36(Custom computer)
 - py36_ros(NSCL computer)
 
@@ -77,22 +77,22 @@ roscore
 
 (torch11py36) conda env
 ```
-rosrun yolact_ros yolact_tcp_img.py  --trained_model=/home/geonhee-ml/rl_ws/src/yolact_ros/src/yolact/weight/yolact_base_1234_100000.pth  --score_threshold=0.3 --top_k=100 --image=/home/geonhee-ml/rl_ws/src/yolact_ros/src/yolact/image/116.jpg 
+rosrun yolact_ros yolact_tcp_img.py  --trained_model=/home/geonhee-ml/rl_ws/src/yolact_ros/src/yolact/weight/yolact_base_1234_100000.pth  --score_threshold=0.3 --top_k=100 --image=/home/geonhee-ml/rl_ws/src/yolact_ros/src/yolact/image/116.jpg
 
 ```
 
 ### Save image from realsense through ros serveice
 
 ```
-rosrun yolact_ros yolact_save_img.py 
+rosrun yolact_ros yolact_save_img.py
 ```
 
 ```
-rosservice call /save_image "data: false" 
+rosservice call /save_image "data: false"
 ```
 
 ### Run ros server for getting call and sending instance information
 
 ```
-rosrun yolact_ros yolact_ros_server.py  --trained_model=/home/geonhee-ml/rl_ws/src/yolact_ros/src/yolact/weight/yolact_base_1234_100000.pth  --score_threshold=0.3 --top_k=100 
+rosrun yolact_ros yolact_ros_server.py  --trained_model=/home/geonhee-ml/rl_ws/src/yolact_ros/src/yolact/weight/yolact_base_1234_100000.pth  --score_threshold=0.3 --top_k=100
 ```

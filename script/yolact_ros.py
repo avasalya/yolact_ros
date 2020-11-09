@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 ## Author: Geonhee !/home/nscl/anaconda3/envs/py36_ros/bin/python
-## Date: November, 11, 2019 
+## Date: November, 11, 2019
 # Purpose: Ros node to use Yolact  using Pytorch
 
 import sys
@@ -50,7 +50,7 @@ import matplotlib.pyplot as plt
 ros_path = '/opt/ros/kinetic/lib/python2.7/dist-packages'
 if ros_path in sys.path:
     sys.path.remove(ros_path)
-    
+
 import cv2
 sys.path.append('/opt/ros/kinetic/lib/python2.7/dist-packages')
 
@@ -141,7 +141,7 @@ def parse_args(argv=None):
 
     if args.output_web_json:
         args.output_coco_json = True
-    
+
     if args.seed is not None:
         random.seed(args.seed)
 
@@ -184,21 +184,21 @@ class Detect:
         cv2.imshow("Image window", cv_image)
         cv2.waitKey(3)
 
-        
-        
+
+
     def evalvideo(self,net:Yolact, path:str):
         # If the path is a digit, parse it as a webcam index
         is_webcam = path.isdigit()
-        
+
         if is_webcam:
             vid = cv2.VideoCapture(int(path))
         else:
             vid = cv2.VideoCapture(path)
-        
+
         if not vid.isOpened():
             print('Could not open video "%s"' % path)
             exit(-1)
-        
+
         net = CustomDataParallel(net).cuda()
         transform = torch.nn.DataParallel(FastBaseTransform()).cuda()
         frame_times = MovingAverage(100)
@@ -235,7 +235,7 @@ class Detect:
         frame_buffer = Queue()
         video_fps = 0
 
-        # All this timing code to make sure that 
+        # All this timing code to make sure that
         def play_video():
             nonlocal frame_buffer, running, video_fps, is_webcam
 
@@ -276,7 +276,7 @@ class Detect:
                 # This gives more accurate timing than if sleeping the whole amount at once
                 while time.time() < target_time:
                     time.sleep(0.001)
-                
+
         extract_frame = lambda x, i: (x[0][i] if x[1][i] is None else x[0][i].to(x[1][i]['box'].device), [x[1][i]])
 
         # Prime the network on the first frame because I do some thread unsafe things otherwise
@@ -299,12 +299,12 @@ class Detect:
 
             # Start loading the next frames from the disk
             next_frames = pool.apply_async(get_next_frame, args=(vid,))
-            
+
             # For each frame in our active processing queue, dispatch a job
             # for that frame using the current function in the sequence
             for frame in active_frames:
                 frame['value'] = pool.apply_async(sequence[frame['idx']], args=(frame['value'],))
-            
+
             # For each frame whose job was the last in the sequence (i.e. for all final outputs)
             for frame in active_frames:
                 if frame['idx'] == 0:
@@ -323,16 +323,16 @@ class Detect:
                     active_frames += [{'value': extract_frame(frame['value'], i), 'idx': 0} for i in range(1, args.video_multiframe)]
                     frame['value'] = extract_frame(frame['value'], 0)
 
-            
+
             # Finish loading in the next frames and add them to the processing queue
             active_frames.append({'value': next_frames.get(), 'idx': len(sequence)-1})
-            
+
             # Compute FPS
             frame_times.add(time.time() - start_time)
             fps = args.video_multiframe / frame_times.get_avg()
 
             print('\rProcessing FPS: %.2f | Video Playback FPS: %.2f | Frames in Buffer: %d    ' % (fps, video_fps, frame_buffer.qsize()), end='')
-        
+
         cleanup_and_exit()
 
     def prep_display(self,dets_out, img, h, w, undo_transform=True, class_color=False, mask_alpha=0.45):
@@ -345,7 +345,7 @@ class Detect:
         else:
             img_gpu = img / 255.0
             h, w, _ = img.shape
-        
+
         with timer.env('Postprocess'):
             t = postprocess(dets_out, w, h, visualize_lincomb = args.display_lincomb,
                                             crop_masks        = args.crop,
@@ -363,7 +363,7 @@ class Detect:
             if scores[j] < args.score_threshold:
                 num_dets_to_consider = j
                 break
-        
+
         if num_dets_to_consider == 0:
             # No detections found so just output the original image
             return (img_gpu * 255).byte().cpu().numpy()
@@ -373,7 +373,7 @@ class Detect:
         def get_color(j, on_gpu=None):
             global color_cache
             color_idx = (classes[j] * 5 if class_color else j * 5) % len(COLORS)
-            
+
             if on_gpu is not None and color_idx in color_cache[on_gpu]:
                 return color_cache[on_gpu][color_idx]
             else:
@@ -392,14 +392,14 @@ class Detect:
         if args.display_masks and cfg.eval_mask_branch:
             # After this, mask is of size [num_dets, h, w, 1]
             masks = masks[:num_dets_to_consider, :, :, None]
-            
+
             # Prepare the RGB images for each mask given their color (size [num_dets, h, w, 1])
             colors = torch.cat([get_color(j, on_gpu=img_gpu.device.index).view(1, 1, 1, 3) for j in range(num_dets_to_consider)], dim=0)
             masks_color = masks.repeat(1, 1, 1, 3) * colors * mask_alpha
 
             # This is 1 everywhere except for 1-mask_alpha where the mask is
             inv_alph_masks = masks * (-mask_alpha) + 1
-            
+
             # I did the math for this on pen and paper. This whole block should be equivalent to:
             #    for j in range(num_dets_to_consider):
             #        img_gpu = img_gpu * inv_alph_masks[j] + masks_color[j]
@@ -410,11 +410,11 @@ class Detect:
                 masks_color_summand += masks_color_cumul.sum(dim=0)
 
             img_gpu = img_gpu * inv_alph_masks.prod(dim=0) + masks_color_summand
-            
+
         # Then draw the stuff that needs to be done on the cpu
         # Note, make sure this is a uint8 tensor or opencv will not anti alias text for whatever reason
         img_numpy = (img_gpu * 255).byte().cpu().numpy()
-        
+
         if args.display_text or args.display_bboxes:
             str_ = ""
             for j in reversed(range(num_dets_to_consider)):
@@ -447,10 +447,10 @@ class Detect:
             #rospy.loginfo(str_)
             #pub.publish(str_)
             #rate.sleep()
-        
+
         return img_numpy
 
-    
+
 if __name__ == '__main__':
 
     parse_args()
@@ -498,7 +498,7 @@ if __name__ == '__main__':
                                     transform=BaseTransform(), has_gt=cfg.dataset.has_gt)
             prep_coco_cats()
         else:
-            dataset = None        
+            dataset = None
 
         print('Loading model...', end='')
         #net = Yolact()

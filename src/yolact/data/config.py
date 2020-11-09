@@ -44,23 +44,15 @@ COCO_CLASSES = ('person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus',
                 'scissors', 'teddy bear', 'hair drier', 'toothbrush')
 
 COCO_LABEL_MAP = { 1:  1,  2:  2,  3:  3,  4:  4,  5:  5,  6:  6,  7:  7,  8:  8,
-                   9:  9, 10: 10, 11: 11, 13: 12, 14: 13, 15: 14, 16: 15, 17: 16,
-                  18: 17, 19: 18, 20: 19, 21: 20, 22: 21, 23: 22, 24: 23, 25: 24,
-                  27: 25, 28: 26, 31: 27, 32: 28, 33: 29, 34: 30, 35: 31, 36: 32,
-                  37: 33, 38: 34, 39: 35, 40: 36, 41: 37, 42: 38, 43: 39, 44: 40,
-                  46: 41, 47: 42, 48: 43, 49: 44, 50: 45, 51: 46, 52: 47, 53: 48,
-                  54: 49, 55: 50, 56: 51, 57: 52, 58: 53, 59: 54, 60: 55, 61: 56,
-                  62: 57, 63: 58, 64: 59, 65: 60, 67: 61, 70: 62, 72: 63, 73: 64,
-                  74: 65, 75: 66, 76: 67, 77: 68, 78: 69, 79: 70, 80: 71, 81: 72,
-                  82: 73, 84: 74, 85: 75, 86: 76, 87: 77, 88: 78, 89: 79, 90: 80}
-
-
-NOBRAND_MINI_CLASSES = ('wet_tissue','food_wrap','steel_scourer','aluminum_foil',
-                        'food_storage_bag','disposable_plate','paper_cups','hangers',
-                        'roller_cleaner','mint_mouthwash','coke','cold_brew',
-                        'cafe_americano','yogurt','strawberry_yogurt','XYLITOL',
-                        'sweetpotato_chip','potato_chip_origin','potato_chip_onion',
-                        'potato_chip_wassbi')
+                9:  9, 10: 10, 11: 11, 13: 12, 14: 13, 15: 14, 16: 15, 17: 16,
+                18: 17, 19: 18, 20: 19, 21: 20, 22: 21, 23: 22, 24: 23, 25: 24,
+                27: 25, 28: 26, 31: 27, 32: 28, 33: 29, 34: 30, 35: 31, 36: 32,
+                37: 33, 38: 34, 39: 35, 40: 36, 41: 37, 42: 38, 43: 39, 44: 40,
+                46: 41, 47: 42, 48: 43, 49: 44, 50: 45, 51: 46, 52: 47, 53: 48,
+                54: 49, 55: 50, 56: 51, 57: 52, 58: 53, 59: 54, 60: 55, 61: 56,
+                62: 57, 63: 58, 64: 59, 65: 60, 67: 61, 70: 62, 72: 63, 73: 64,
+                74: 65, 75: 66, 76: 67, 77: 68, 78: 69, 79: 70, 80: 71, 81: 72,
+                82: 73, 84: 74, 85: 75, 86: 76, 87: 77, 88: 78, 89: 79, 90: 80}
 
 
 
@@ -86,7 +78,7 @@ class Config(object):
         """
 
         ret = Config(vars(self))
-        
+
         for key, val in new_config_dict.items():
             ret.__setattr__(key, val)
 
@@ -102,7 +94,7 @@ class Config(object):
 
         for key, val in new_config_dict.items():
             self.__setattr__(key, val)
-    
+
     def print(self):
         for k, v in vars(self).items():
             print(k, ' = ', v)
@@ -136,9 +128,22 @@ dataset_base = Config({
     'label_map': None
 })
 
+onigiriLabelme_dataset = dataset_base.copy({
+    'name': 'onigiri200Coco',
+
+    'train_images': './data/coco/',
+    'train_info': './data/coco/annotations.json',
+
+    'valid_images': './data/coco/',
+    'valid_info': './data/coco/annotations.json',
+
+    # 'label_map': COCO_LABEL_MAP
+    'class_names': ('onigiri')
+})
+
 coco2014_dataset = dataset_base.copy({
     'name': 'COCO 2014',
-    
+
     'train_info': './data/coco/annotations/instances_train2014.json',
     'valid_info': './data/coco/annotations/instances_val2014.json',
 
@@ -147,7 +152,7 @@ coco2014_dataset = dataset_base.copy({
 
 coco2017_dataset = dataset_base.copy({
     'name': 'COCO 2017',
-    
+
     'train_info': './data/coco/annotations/instances_train2017.json',
     'valid_info': './data/coco/annotations/instances_val2017.json',
 
@@ -163,19 +168,24 @@ coco2017_testdev_dataset = dataset_base.copy({
     'label_map': COCO_LABEL_MAP
 })
 
+PASCAL_CLASSES = ("aeroplane", "bicycle", "bird", "boat", "bottle",
+                "bus", "car", "cat", "chair", "cow", "diningtable",
+                "dog", "horse", "motorbike", "person", "pottedplant",
+                "sheep", "sofa", "train", "tvmonitor")
 
+pascal_sbd_dataset = dataset_base.copy({
+    'name': 'Pascal SBD 2012',
 
-nobrand_mini_dataset = dataset_base.copy({
-    'name': 'nobrand_mini',
-    
-    'train_images': './data/nobrand/images/train',
-    'train_info': './data/nobrand/annotations/train_nobrand.json',
-    'valid_images': './data/nobrand/images/val',
-    'valid_info': './data/nobrand/annotations/val_nobrand.json',
+    'train_images': './data/sbd/img',
+    'valid_images': './data/sbd/img',
 
-    'class_names': NOBRAND_MINI_CLASSES,
+    'train_info': './data/sbd/pascal_sbd_train.json',
+    'valid_info': './data/sbd/pascal_sbd_val.json',
 
+    'class_names': PASCAL_CLASSES,
 })
+
+
 
 
 
@@ -250,12 +260,22 @@ resnet101_gn_backbone = backbone_base.copy({
     'pred_aspect_ratios': [ [[0.66685089, 1.7073535, 0.87508774, 1.16524493, 0.49059086]] ] * 6,
 })
 
+resnet101_dcn_inter3_backbone = resnet101_backbone.copy({
+    'name': 'ResNet101_DCN_Interval3',
+    'args': ([3, 4, 23, 3], [0, 4, 23, 3], 3),
+})
+
 resnet50_backbone = resnet101_backbone.copy({
     'name': 'ResNet50',
     'path': 'resnet50-19c8e357.pth',
     'type': ResNetBackbone,
     'args': ([3, 4, 6, 3],),
     'transform': resnet_transform,
+})
+
+resnet50_dcnv2_backbone = resnet50_backbone.copy({
+    'name': 'ResNet50_DCNv2',
+    'args': ([3, 4, 6, 3], [0, 4, 6, 3]),
 })
 
 darknet53_backbone = backbone_base.copy({
@@ -352,6 +372,8 @@ mask_type = Config({
     #   - mask_proto_normalize_emulate_roi_pooling (bool): Normalize the mask loss to emulate roi pooling's affect on loss.
     #   - mask_proto_double_loss (bool): Whether to use the old loss in addition to any special new losses.
     #   - mask_proto_double_loss_alpha (float): The alpha to weight the above loss.
+    #   - mask_proto_split_prototypes_by_head (bool): If true, this will give each prediction head its own prototypes.
+    #   - mask_proto_crop_with_pred_box (bool): Whether to crop with the predicted box or the gt box.
     'lincomb': 1,
 })
 
@@ -391,6 +413,12 @@ fpn_base = Config({
     # Whether to pad the pred layers with 1 on each side (I forgot to add this at the start)
     # This is just here for backwards compatibility
     'pad': True,
+
+    # Whether to add relu to the downsampled layers.
+    'relu_downsample_layers': False,
+
+    # Whether to add relu to the regular layers
+    'relu_pred_layers': True,
 })
 
 
@@ -431,6 +459,13 @@ coco_base_config = Config({
     # Eval.py sets this if you just want to run YOLACT as a detector
     'eval_mask_branch': True,
 
+    # Top_k examples to consider for NMS
+    'nms_top_k': 200,
+    # Examples with confidence less than this are not considered by NMS
+    'nms_conf_thresh': 0.05,
+    # Boxes with IoU overlap greater than this threshold will be culled during NMS
+    'nms_thresh': 0.5,
+
     # See mask_type for details.
     'mask_type': mask_type.direct,
     'mask_size': 16,
@@ -459,6 +494,8 @@ coco_base_config = Config({
     'mask_proto_normalize_emulate_roi_pooling': False,
     'mask_proto_double_loss': False,
     'mask_proto_double_loss_alpha': 1,
+    'mask_proto_split_prototypes_by_head': False,
+    'mask_proto_crop_with_pred_box': False,
 
     # SSD data augmentation parameters
     # Randomize hue, vibrance, etc.
@@ -469,6 +506,14 @@ coco_base_config = Config({
     'augment_random_sample_crop': True,
     # Mirror the image with a probability of 1/2
     'augment_random_mirror': True,
+    # Flip the image vertically with a probability of 1/2
+    'augment_random_flip': False,
+    # With uniform probability, rotate the image [0,90,180,270] degrees
+    'augment_random_rot90': False,
+
+    # Discard detections with width and height smaller than this (in absolute width and height)
+    'discard_box_width': 4 / 550,
+    'discard_box_height': 4 / 550,
 
     # If using batchnorm anywhere in the backbone, freeze the batchnorm layer during training.
     # Note: any additional batch norm layers after the backbone will not be frozen.
@@ -488,10 +533,17 @@ coco_base_config = Config({
     'use_focal_loss': False,
     'focal_loss_alpha': 0.25,
     'focal_loss_gamma': 2,
-    
+
     # The initial bias toward forground objects, as specified in the focal loss paper
     'focal_loss_init_pi': 0.01,
 
+    # Keeps track of the average number of examples for each class, and weights the loss for that class accordingly.
+    'use_class_balanced_conf': False,
+
+    # Input image size. If preserve_aspect_ratio is False, min_size is ignored.
+    'min_size': 200,
+    'max_size': 300,
+    
     # Whether to use sigmoid focal loss instead of softmax, all else being the same.
     'use_sigmoid_focal_loss': False,
 
@@ -508,6 +560,10 @@ coco_base_config = Config({
     # This branch is only evaluated during training time and is just there for multitask learning.
     'use_semantic_segmentation_loss': False,
     'semantic_segmentation_alpha': 1,
+
+    # Adds another branch to the netwok to predict Mask IoU.
+    'use_mask_scoring': False,
+    'mask_scoring_alpha': 1,
 
     # Match gt boxes using the Box2Pix change metric instead of the standard IoU metric.
     # Note that the threshold you set for iou_threshold should be negative with this setting on.
@@ -531,6 +587,9 @@ coco_base_config = Config({
     'positive_iou_threshold': 0.5,
     'negative_iou_threshold': 0.5,
 
+    # When using ohem, the ratio between positives and negatives (3 means 3 negatives to 1 positive)
+    'ohem_negpos_ratio': 3,
+
     # If less than 1, anchors treated as a negative that have a crowd iou over this threshold with
     # the crowd boxes will be treated as a neutral.
     'crowd_iou_threshold': 1,
@@ -538,10 +597,9 @@ coco_base_config = Config({
     # This is filled in at runtime by Yolact's __init__, so don't touch it
     'mask_dim': None,
 
-    # Input image size. If preserve_aspect_ratio is False, min_size is ignored.
-    'min_size': 200,
+    # Input image size.
     'max_size': 300,
-    
+
     # Whether or not to do post processing on the cpu at test time
     'force_cpu_nms': True,
 
@@ -562,7 +620,7 @@ coco_base_config = Config({
     'use_gt_bboxes': False,
 
     # Whether or not to preserve aspect ratio when resizing the image.
-    # If True, uses the faster r-cnn resizing scheme.
+    # If True, this will resize all images to be max_size^2 pixels in area while keeping aspect ratio.
     # If False, all images are resized to max_size x max_size
     'preserve_aspect_ratio': False,
 
@@ -571,7 +629,7 @@ coco_base_config = Config({
 
     # Whether or not to use the predicted coordinate scheme from Yolo v2
     'use_yolo_regressors': False,
-    
+
     # For training, bboxes are considered "positive" if their anchors have a 0.5 IoU overlap
     # or greater with a ground truth box. If this is true, instead of using the anchor boxes
     # for this IoU computation, the matching function will use the predicted bbox coordinates.
@@ -587,6 +645,23 @@ coco_base_config = Config({
 
     'backbone': None,
     'name': 'base_config',
+
+    # Fast Mask Re-scoring Network
+    # Inspried by Mask Scoring R-CNN (https://arxiv.org/abs/1903.00241)
+    # Do not crop out the mask with bbox but slide a convnet on the image-size mask,
+    # then use global pooling to get the final mask score
+    'use_maskiou': False,
+
+    # Archecture for the mask iou network. A (num_classes-1, 1, {}) layer is appended to the end.
+    'maskiou_net': [],
+
+    # Discard predicted masks whose area is less than this
+    'discard_mask_area': -1,
+
+    'maskiou_alpha': 1.0,
+    'rescore_mask': False,
+    'rescore_bbox': False,
+    'maskious_to_train': -1,
 })
 
 
@@ -599,18 +674,16 @@ yolact_base_config = coco_base_config.copy({
     'name': 'yolact_base',
 
     # Dataset stuff
-    #'dataset': coco2017_dataset,
-    #'num_classes': len(coco2017_dataset.class_names) + 1,
-    'dataset': nobrand_mini_dataset,
-    'num_classes': len(nobrand_mini_dataset.class_names) + 1,
+    'dataset': onigiriLabelme_dataset,
+    'num_classes': len(onigiriLabelme_dataset.class_names) + 1,
 
     # Image Size
     'max_size': 550,
-    
+
     # Training params
     'lr_steps': (280000, 600000, 700000, 750000),
     'max_iter': 800000,
-    
+
     # Backbone Settings
     'backbone': resnet101_backbone.copy({
         'selected_layers': list(range(1, 4)),
@@ -671,7 +744,7 @@ yolact_darknet53_config = yolact_base_config.copy({
 
     'backbone': darknet53_backbone.copy({
         'selected_layers': list(range(2, 5)),
-        
+
         'pred_scales': yolact_base_config.backbone.pred_scales,
         'pred_aspect_ratios': yolact_base_config.backbone.pred_aspect_ratios,
         'use_pixel_scales': True,
@@ -685,7 +758,7 @@ yolact_resnet50_config = yolact_base_config.copy({
 
     'backbone': resnet50_backbone.copy({
         'selected_layers': list(range(1, 4)),
-        
+
         'pred_scales': yolact_base_config.backbone.pred_scales,
         'pred_aspect_ratios': yolact_base_config.backbone.pred_aspect_ratios,
         'use_pixel_scales': True,
@@ -695,7 +768,59 @@ yolact_resnet50_config = yolact_base_config.copy({
 })
 
 
+yolact_resnet50_pascal_config = yolact_resnet50_config.copy({
+    'name': None, # Will default to yolact_resnet50_pascal
 
+    # Dataset stuff
+    'dataset': pascal_sbd_dataset,
+    'num_classes': len(pascal_sbd_dataset.class_names) + 1,
+
+    'max_iter': 120000,
+    'lr_steps': (60000, 100000),
+
+    'backbone': yolact_resnet50_config.backbone.copy({
+        'pred_scales': [[32], [64], [128], [256], [512]],
+        'use_square_anchors': False,
+    })
+})
+
+# ----------------------- YOLACT++ CONFIGS ----------------------- #
+
+yolact_plus_base_config = yolact_base_config.copy({
+    'name': 'yolact_plus_base',
+
+    'backbone': resnet101_dcn_inter3_backbone.copy({
+        'selected_layers': list(range(1, 4)),
+
+        'pred_aspect_ratios': [ [[1, 1/2, 2]] ]*5,
+        'pred_scales': [[i * 2 ** (j / 3.0) for j in range(3)] for i in [24, 48, 96, 192, 384]],
+        'use_pixel_scales': True,
+        'preapply_sqrt': False,
+        'use_square_anchors': False,
+    }),
+
+    'use_maskiou': True,
+    'maskiou_net': [(8, 3, {'stride': 2}), (16, 3, {'stride': 2}), (32, 3, {'stride': 2}), (64, 3, {'stride': 2}), (128, 3, {'stride': 2})],
+    'maskiou_alpha': 25,
+    'rescore_bbox': False,
+    'rescore_mask': True,
+
+    'discard_mask_area': 5*5,
+})
+
+yolact_plus_resnet50_config = yolact_plus_base_config.copy({
+    'name': 'yolact_plus_resnet50',
+
+    'backbone': resnet50_dcnv2_backbone.copy({
+        'selected_layers': list(range(1, 4)),
+
+        'pred_aspect_ratios': [ [[1, 1/2, 2]] ]*5,
+        'pred_scales': [[i * 2 ** (j / 3.0) for j in range(3)] for i in [24, 48, 96, 192, 384]],
+        'use_pixel_scales': True,
+        'preapply_sqrt': False,
+        'use_square_anchors': False,
+    }),
+})
 
 
 # Default config
@@ -709,7 +834,10 @@ def set_cfg(config_name:str):
     # be used like ssd300_config.copy({'max_size': 400}) for extreme fine-tuning
     cfg.replace(eval(config_name))
 
+    if cfg.name is None:
+        cfg.name = config_name.split('_config')[0]
+
 def set_dataset(dataset_name:str):
     """ Sets the dataset of the current config. """
     cfg.dataset = eval(dataset_name)
-    
+

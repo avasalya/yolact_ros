@@ -5,7 +5,7 @@
 
 import sys
 sys.path.append('/opt/ros/kinetic/lib/python2.7/dist-packages')
- 
+
 # Yolact
 #sys.path.append(os.path.join(os.path.dirname(__file__), "yolact"))
 import yolact
@@ -158,7 +158,7 @@ def parse_args(argv=None):
 
     if args.output_web_json:
         args.output_coco_json = True
-    
+
     if args.seed is not None:
         random.seed(args.seed)
 
@@ -168,7 +168,7 @@ class DetectImg:
         print ("Initalization about DetectImg class")
         self.save_cnt = 0
         self.net = net
-        
+
         self.bridge = CvBridge()
         self.detections_pub = rospy.Publisher("detections",numpy_msg(Detections),queue_size=10)
         self.com_pub = rospy.Publisher("com_info",numpy_msg(GraspPt),queue_size=10)
@@ -186,7 +186,7 @@ class DetectImg:
         cfg.mask_proto_debug = args.mask_proto_debug
 
         self.evalimage()
-            
+
     def evalimage(self):
         cv_img = self.get_data()
         #frame = torch.from_numpy(cv2.imread(path)).cuda().float()
@@ -204,7 +204,7 @@ class DetectImg:
         mask_data = mask_data.numpy()
         mask_data = mask_data.astype(np.int64)
         mask_data = mask_data * 100
-         
+
         # The number of detected objects
         num_object = num_dets_to_consider
         center_of_mass_instance = GraspPt()
@@ -215,7 +215,7 @@ class DetectImg:
             mask_h_sum = 0
             mask_w_sum = 0
             sum_count = 0
-            
+
             for i in range(0, mask_data.shape[1]):
                 for j in range(0,mask_data.shape[2]):
                     if mask_data[num_,i,j,0] != 0:
@@ -235,10 +235,10 @@ class DetectImg:
             mask_data[num_, mask_h_index, mask_w_index, 0] = 255
 
             img = mask_data[num_, :, :, 0]
-        
+
             rows = img.shape[0]
             cols = img.shape[1]
-            
+
             x = np.ones((rows, 1))
             y = np.ones((1, cols))
 
@@ -265,10 +265,10 @@ class DetectImg:
             a_img = f_img * (x * x)
             b_img = f_img * (x * y)
             c_img = f_img * (y * y)
-            
+
             a = a_img.sum()
             b = b_img.sum()*2
-            c = c_img.sum() 
+            c = c_img.sum()
 
             denom = b*b + (a-c)*(a-c)
 
@@ -289,7 +289,7 @@ class DetectImg:
                 lmax = 0.5*(c+a) - 0.5*(a-c)*cos2thetamax - 0.5*b*sin2thetamax
 
                 roundness = lmin/lmax
-            
+
             if thetamin > 0:
                 pass
             elif thetamin < 0:
@@ -305,18 +305,18 @@ class DetectImg:
 
             rotation_point_x = int(rotation_point_x)
             rotation_point_y = int(rotation_point_y)
-            
+
             mask_data[num_, rotation_point_x, rotation_point_y, 0] = 255
-            
+
             center_of_mass_instance.class_name.append(detections.detections[num_object -1 - num_].class_name)
             center_of_mass_instance.score.append(detections.detections[num_object -1 - num_].score)
             center_of_mass_instance.com_x.append(mask_w_index)
             center_of_mass_instance.com_y.append(mask_h_index)
 
             center_of_mass_instance.angle.append(thetamin)
-        
+
         self.com_pub.publish(center_of_mass_instance)
-        self.save_cnt = self.save_cnt +1 
+        self.save_cnt = self.save_cnt +1
         cv2.imwrite("/home/geonhee-ml/Desktop/%d_img_raw_%d.jpg" %(self.save_cnt, thetamin * 57.325), img_numpy)
         for i in range(0, num_object):
             cv2.imwrite("/home/geonhee-ml/Desktop/%d_img_mask_%d.jpg" %(self.save_cnt, center_of_mass_instance.angle[i] * 57.325), mask_data[i,:,:,:])
@@ -327,7 +327,7 @@ class DetectImg:
         Note: If undo_transform=False then im_h and im_w are allowed to be None.
         """
         with torch.no_grad():
-            detections = Detections() 
+            detections = Detections()
 
             if undo_transform:
                 img_numpy = undo_image_transformation(img, w, h)
@@ -335,7 +335,7 @@ class DetectImg:
             else:
                 img_gpu = img / 255.0
                 h, w, _ = img.shape
-            
+
             with timer.env('Postprocess'):
                 t = postprocess(dets_out, w, h, visualize_lincomb = args.display_lincomb,
                                                 crop_masks        = args.crop,
@@ -353,7 +353,7 @@ class DetectImg:
                 if scores[j] < args.score_threshold:
                     num_dets_to_consider = j
                     break
-            
+
             if num_dets_to_consider == 0:
                 # No detections found so just output the original image
                 return (img_gpu * 255).byte().cpu().numpy()
@@ -363,7 +363,7 @@ class DetectImg:
             def get_color(j, on_gpu=None):
                 global color_cache
                 color_idx = (classes[j] * 5 if class_color else j * 5) % len(COLORS)
-                
+
                 if on_gpu is not None and color_idx in color_cache[on_gpu]:
                     return color_cache[on_gpu][color_idx]
                 else:
@@ -382,14 +382,14 @@ class DetectImg:
             if args.display_masks and cfg.eval_mask_branch:
                 # After this, mask is of size [num_dets, h, w, 1]
                 masks = masks[:num_dets_to_consider, :, :, None]
-                
+
                 # Prepare the RGB images for each mask given their color (size [num_dets, h, w, 1])
                 colors = torch.cat([get_color(j, on_gpu=img_gpu.device.index).view(1, 1, 1, 3) for j in range(num_dets_to_consider)], dim=0)
                 masks_color = masks.repeat(1, 1, 1, 3) * colors * mask_alpha
 
                 # This is 1 everywhere except for 1-mask_alpha where the mask is
                 inv_alph_masks = masks * (-mask_alpha) + 1
-                
+
                 # I did the math for this on pen and paper. This whole block should be equivalent to:
                 #    for j in range(num_dets_to_consider):
                 #        img_gpu = img_gpu * inv_alph_masks[j] + masks_color[j]
@@ -400,11 +400,11 @@ class DetectImg:
                     masks_color_summand += masks_color_cumul.sum(dim=0)
 
                 img_gpu = img_gpu * inv_alph_masks.prod(dim=0) + masks_color_summand
-                
+
             # Then draw the stuff that needs to be done on the cpu
             # Note, make sure this is a uint8 tensor or opencv will not anti alias text for whatever reason
             img_numpy = (img_gpu * 255).byte().cpu().numpy()
-            
+
             print("Num dets: ",  num_dets_to_consider)
             if args.display_text or args.display_bboxes:
                 for j in reversed(range(num_dets_to_consider)):
@@ -430,7 +430,7 @@ class DetectImg:
 
                         cv2.rectangle(img_numpy, (x1, y1), (x1 + text_w, y1 - text_h - 4), color, -1)
                         cv2.putText(img_numpy, text_str, text_pt, font_face, font_scale, text_color, font_thickness, cv2.LINE_AA)
-            
+
                     det = Detection()
                     det.box.x1 = x1
                     det.box.y1 = y1
@@ -453,15 +453,15 @@ class DetectImg:
                     detections.detections.append(det)
                 detections.header.stamp = image_header.stamp
                 detections.header.frame_id = image_header.frame_id
-            
-            self.detections_pub.publish(detections)                
+
+            self.detections_pub.publish(detections)
             self.get_orientation_from_mask(num_dets_to_consider, img_numpy, detections, masks)
-   
+
             try:
                 self.image_pub.publish(self.bridge.cv2_to_imgmsg(img_numpy, "bgr8"))
             except CvBridgeError as e:
                 print(e)
-            
+
             #return num_dets_to_consider, img_numpy, masks
 
     def get_data(self):
@@ -482,7 +482,7 @@ class DetectImg:
 
         # Connect to server
         intrinsics = None
-        
+
         #Ping the server with anything
         tcp_socket.send(b'asdf')
 
@@ -501,7 +501,7 @@ class DetectImg:
         depth_img = np.fromstring(data[(10*4):((10*4)+im_width*im_height*2)], np.uint16).reshape(im_height, im_width)
         color_img = np.fromstring(data[((10*4)+im_width*im_height*2):], np.uint8).reshape(im_height, im_width, 3)
         depth_img = depth_img.astype(float) * depth_scale
-        
+
         # Color ndarray to img
         tmp_color_data = np.asarray(color_img)
         tmp_color_data.shape = (im_height,im_width,3)
